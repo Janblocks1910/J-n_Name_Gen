@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Character Name Generator</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        #generatedNamesContainer {
+            background-color: #333333;
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* Hide the generated names container by default */
+            margin-top: 20px;
+        }
+
+        .generatedName {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .nameButton {
+            background-color: #555555;
+            color: #ffffff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .nameButton:hover {
+            background-color: #777777;
+        }
+
+        #textInput {
+            margin-top: 20px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            border: 1px solid #777777;
+            background-color: #333333;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fantasy Character Name Generator</h1>
+    <button onclick="generateNames()">Generate Names</button>
+    <div id="generatedNamesContainer"></div>
+
+    <input type="text" id="textInput" placeholder="Type a word..." onkeypress="handleKeyPress(event)">
+
+    <audio id="backgroundMusic" src="music/Spanish_or_Vanish_from_Duolingo_On_Ice.mp4" loop autoplay volume="0.1"></audio>
+
+    <script>
+        var backgroundMusic = document.getElementById('backgroundMusic');
+        var utterance = null;
+
+        // Start playing the background music when the page loads
+        window.addEventListener('DOMContentLoaded', (event) => {
+            backgroundMusic.play();
+        });
+
+        function generateNames() {
+            var numNames = 5; // Number of names to generate
+            var minSpeakableLetters = 2; // Minimum number of speakable letters required
+
+            // Arrays with syllables for the name
+            var prefixes = ["Aer", "Bel", "Cyr", "Dyr", "Eir", "Fer", "Gly", "Hyl", "Iyr", "Jor", "Kyr", "Lor", "Myr", "Nyr", "Oth", "Pyx", "Qyr", "Ryx", "Syl", "Tyr", "Uyr", "Vyl", "Wyr", "Xar", "Yvr", "Zyr"];
+            var suffixes = ["dor", "vian", "mir", "thor", "wyn", "zel", "tis", "lorn", "rian", "gorn", "dras", "kara", "shan", "vash", "dorin", "zul", "gath", "wind", "thorn", "elar", "mire", "gore", "brin", "tash", "wynn", "dorn", "fyr", "syl", "dys", "dusk", "aer", "vyr", "myr", "ryn", "xir", "zyl", "lyr"];
+            var rareMidfixes = ["ae", "ea", "io", "ou", "ie", "ei", "oo", "ua", "ai", "au", "ei", "oo", "ui"];
+            var extraRareMidfixes = ["ay", "oy", "uy", "ei", "ie", "ia", "ai", "ea", "oa"];
+            var specialSuffixes = ["th", "on", "as", "il", "or", "us", "ur", "ia", "an", "os", "es", "ar", "el", "ix", "en"];
+
+            // Create an array to store generated names
+            var generatedNames = [];
+
+            // Generate multiple names
+            for (var i = 0; i < numNames; i++) {
+                var prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                var suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+                var midfix;
+
+                // Randomly select midfix based on rarity
+                var rarity = Math.random();
+                if (rarity < 0.6) { // 60% chance for common midfix
+                    midfix = "";
+                } else if (rarity < 0.8) { // 20% chance for rare midfix
+                    midfix = rareMidfixes[Math.floor(Math.random() * rareMidfixes.length)];
+                } else if (rarity < 0.95) { // 15% chance for extra rare midfix
+                    midfix = extraRareMidfixes[Math.floor(Math.random() * extraRareMidfixes.length)];
+                } else { // 5% chance for special suffix
+                    suffix = specialSuffixes[Math.floor(Math.random() * specialSuffixes.length)];
+                    midfix = "";
+                }
+
+                // Create the generated name
+                var generatedName = prefix + midfix + suffix;
+                
+                // Check if the name is speakable
+                if (countSpeakableLetters(generatedName) >= minSpeakableLetters) {
+                    generatedNames.push(generatedName);
+                }
+            }
+
+            // Display the generated names
+            var namesContainer = document.getElementById("generatedNamesContainer");
+            namesContainer.innerHTML = ""; // Clear previous names
+            generatedNames.forEach(function(name) {
+                var nameContainer = document.createElement("div");
+                nameContainer.classList.add("generatedName");
+
+                var nameElement = document.createElement("span");
+                nameElement.textContent = name;
+                nameContainer.appendChild(nameElement);
+
+                var nameButton = document.createElement("button");
+                nameButton.textContent = "Speak";
+                nameButton.classList.add("nameButton");
+                nameButton.onclick = function() {
+                    if (utterance && utterance.speaking) {
+                        utterance.onend = function() {
+                            speakName(name);
+                            fadeOutMusic();
+                        };
+                    } else {
+                        speakName(name);
+                        fadeOutMusic();
+                    }
+                };
+                nameContainer.appendChild(nameButton);
+
+                namesContainer.appendChild(nameContainer);
+            });
+
+            // Show the generated names container
+            namesContainer.style.display = "block";
+        }
+
+        function speakName(name) {
+            // Create a new speech synthesis utterance
+            utterance = new SpeechSynthesisUtterance(name);
+
+            // Set speech parameters
+            utterance.lang = "en-US";
+            utterance.volume = 1; // 0 to 1
+            utterance.rate = 0.9; // 0.1 to 10
+            utterance.pitch = 1; // 0 to 2
+            if (Math.random() < 0.3) { // 30% chance for different voice
+                utterance.voice = window.speechSynthesis.getVoices().find(voice => voice.name === "Google UK English Male");
+            }
+
+            // Reduce the volume of the background music while speaking
+            backgroundMusic.volume = 0.05;
+
+            // Speak the utterance
+            window.speechSynthesis.speak(utterance);
+
+            // When TTS finishes, restore the background music volume
+            utterance.onend = function() {
+                backgroundMusic.volume = 0.1;
+            };
+        }
+
+        function countSpeakableLetters(name) {
+            var count = 0;
+            for (var i = 0; i < name.length; i++) {
+                var letter = name[i].toLowerCase();
+                if (letter !== 'n' && letter !== 'm' && letter !== 'p') {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        function fadeOutMusic() {
+            var volume = backgroundMusic.volume;
+            var fadeoutInterval = setInterval(function() {
+                if (volume > 0) {
+                    volume -= 0.01; // Adjust the rate of volume decrease as needed
+                    backgroundMusic.volume = volume;
+                } else {
+                    clearInterval(fadeoutInterval);
+                }
+            }, 100); // Adjust the interval as needed (higher for slower fade out)
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                var inputText = document.getElementById('textInput').value.trim();
+                if (inputText !== '') {
+                    speakName(inputText);
+                    fadeOutMusic();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
