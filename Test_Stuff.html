@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pop-up Animation</title>
+<style>
+.popup {
+  width: 200px;
+  height: 100px;
+  background-color: lightblue;
+  border-radius: 10px;
+  text-align: center;
+  padding-top: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.popup.active {
+  opacity: 1;
+}
+</style>
+<style>
+    /* Style the button */
+    .button {
+      background-color: lightblue;
+      border: 2px solid black;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    /* Change button color on hover */
+    .button:hover {
+      background-color: skyblue;
+    }
+    
+    /* Darken button when pressed */
+    .button:active {
+      background-color: deepskyblue;
+    }
+    </style>
+</head>
+<body>
+  <button class="button" onclick="togglePopup()">Show Popup</button>
+  
+  <div class="popup" id="myPopup">
+    Hello! I'm a pop-up.
+  </div>
+
+<script>
+function togglePopup() {
+  var popup = document.getElementById('myPopup');
+  popup.classList.toggle('active');
+}
+</script>
+</body>
+</html>
