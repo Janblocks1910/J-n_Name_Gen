@@ -51,6 +51,7 @@
 <body>
     <h1>Fantasy Character Name Generator</h1>
     <button onclick="playMusic()">Play Music</button>
+    <button onclick="StopMusic()">Stop Music</button>
     <button onclick="generateNames()">Generate Names</button>
     <div id="generatedNamesContainer"></div>
 
@@ -69,7 +70,12 @@
 
         function playMusic() {
             // grab backgroundMusic
-            const bgMusic = document.querySelector("#backgroundMusic").play();
+            document.querySelector("#backgroundMusic").play();
+        }
+
+        function StopMusic() {
+            // grab music u dumb fuck
+            document.querySelector("#backgroundMusic").pause();
         }
 
         function generateNames() {
